@@ -1,0 +1,22 @@
+{
+  "name": "odoo-event-function",
+  "version": "0.1.0",
+  "description": "",
+  "scripts": {
+    "dev": "ts-node-dev --pretty --quiet --transpile-only src/index.ts",
+    "build": "tsc"
+  },
+  "author": "Gustav Utke Kauman <hello@kauman.dev>",
+  "license": "MIT",
+  "dependencies": {
+    "@google-cloud/local-auth": "^2.1.0",
+    "dotenv": "^16.4.5",
+    "google-auth-library": "^9.10.0",
+    "googleapis": "^105.0.0",
+    "odoots": "^0.1.2"
+  },
+  "devDependencies": {
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.5"
+  }
+}
