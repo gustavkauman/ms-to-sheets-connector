@@ -1,9 +1,12 @@
 import { getConsentUrl, setAuthCode, testConnection } from "./google/oauthClient";
 import { addValuesToSheet, getValuesFromSheet } from "./google/sheets";
 import { getEventResponses, printAllEvents } from "./medlemsservice";
+import * as dotenv from "dotenv";
 
-const SHEET_ID = "1z3OF6kpt8xjhRwESaUov3l7oc8lt09gWLcPV4cPjX2k";
-const SHEET_NAME = "Sheet1";
+dotenv.config();
+
+const SHEET_ID = process.env.SHEET_ID ?? "";
+const SHEET_NAME = process.env.SHEET_NAME ?? "";
 
 async function handle() {
     switch (process.argv[2].toLowerCase()) {
