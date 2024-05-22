@@ -31,7 +31,7 @@ async function addValuesToSheet(spreadsheetId: string, sheetName: string, values
     const res = await sheets.spreadsheets.values.append({
         spreadsheetId,
         range,
-        valueInputOption: `USER_ENTERED`,
+        valueInputOption: `RAW`,
         insertDataOption: `INSERT_ROWS`,
         requestBody: {
             values
@@ -44,11 +44,19 @@ async function addValuesToSheet(spreadsheetId: string, sheetName: string, values
 
 function convertNumberToSheetColumn(value: number): string {
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    let result = "";
+
+    if (value > alphabet.length) {
+        result += alphabet.charAt(value - alphabet.length - 1);
+        value = value - alphabet.length;
+    }
     
-    if (value > alphabet.length)
+    if (value > alphabet.length * 2)
         throw new Error("Yeeeezzzz, too many questions to handle the columns!");
 
-    return alphabet.charAt(value - 1);
+    result += alphabet.charAt(value - 1);
+
+    return result;
 }
 
 export { getValuesFromSheet, addValuesToSheet };
