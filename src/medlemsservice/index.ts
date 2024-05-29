@@ -14,7 +14,8 @@ async function getEventResponses(eventId: number, fromRegistrationId: number = 0
         [
             [
                 ["event_id", "=", eventId],
-                ["id", ">", fromRegistrationId]
+                ["id", ">", fromRegistrationId],
+                ["state", "<>", "draft"]
             ],
             [
                 "id"
