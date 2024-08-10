@@ -8,6 +8,19 @@ let authenticated = false;
 async function getEventResponses(eventId: number, fromRegistrationId: number = 0): Promise<string[][]> {
     await ensureAuthenticated();
 
+    const eventQuestions = await odoo.call(
+        "event.question",
+        "search_read",
+        [
+            [
+                ["event_id", "=", eventId],
+                ["hidden", "<>", "true"]
+            ],
+            [
+            ]
+        ]
+    );
+
     const eventRegistrations = await odoo.call(
         "event.registration",
         "search_read",
@@ -19,13 +32,18 @@ async function getEventResponses(eventId: number, fromRegistrationId: number = 0
             ],
             [
                 "id"
+                , "name"
+                , "phone"
+                , "email"
             ]
         ],
         { limit: 10, order: "id" }
     );
 
     const map = await Promise.all(eventRegistrations.map(async (eventRegistration: any): Promise<any> => {
-        const questionResponses = await odoo.call(
+        const questionResponses: { [k: string]: any } = {};
+
+        (await odoo.call(
             "event.question.response",
             "search_read",
             [
@@ -40,20 +58,55 @@ async function getEventResponses(eventId: number, fromRegistrationId: number = 0
                     "question_type"
                 ]
             ]
-        );
+        )).forEach((response: any) => {
+            let key = "";
 
-        const res = questionResponses.map((response: any) => { 
-            switch (response.question_type) {
-                case 'text':
-                case 'email':
-                case 'date':
-                    return response.response_format;
-                default:
-                    return response.event_question_option_id[1];
+            if (response.question_type === "checkbox") {
+                key = `${response.event_question_id[0]}+${response.event_question_option_id[0]}`;
+            } else {
+                key = response.event_question_id[0];
+            }
+
+            questionResponses[key] = response;
+        });
+
+        let res: any[] = [];
+
+        eventQuestions.forEach((val: any) => {
+            if (val.question_type === "checkbox") {
+                // Checkbox questions has the funny quirk that each checkbox is
+                // registered as an individual response.
+                val.event_question_option_ids.forEach((option: any) => {
+                    let answer = questionResponses[`${val.id}+${option}`];
+
+                    (answer)
+                        // ? res.push(answer.event_question_option_id[1].trim())
+                        ? res.push('x')
+                        : res.push('');
+                });
+            } else {
+                let answer = questionResponses[`${val.id}`];
+
+                switch (answer.question_type) {
+                    case 'text':
+                    case 'email':
+                    case 'date':
+                        res.push(answer.response_format.trim());
+                        break;
+                    default:
+                        res.push(answer.event_question_option_id[1].trim());
+                        break;
+                }
             }
         });
 
-        return [ eventRegistration.id, ...res ];
+        return [
+            eventRegistration.id,
+            eventRegistration.name,
+            eventRegistration.email,
+            eventRegistration.phone,
+            ...res
+        ];
     }));
 
     return map;
