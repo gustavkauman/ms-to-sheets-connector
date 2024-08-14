@@ -87,15 +87,19 @@ async function getEventResponses(eventId: number, fromRegistrationId: number = 0
             } else {
                 let answer = questionResponses[`${val.id}`];
 
-                switch (answer.question_type) {
-                    case 'text':
-                    case 'email':
-                    case 'date':
-                        res.push(answer.response_format.trim());
+                if (answer) {
+                    switch (answer.question_type) {
+                        case 'text':
+                            case 'email':
+                            case 'date':
+                            res.push(answer.response_format.trim());
                         break;
-                    default:
-                        res.push(answer.event_question_option_id[1].trim());
+                        default:
+                            res.push(answer.event_question_option_id[1].trim());
                         break;
+                    }
+                } else {
+                    res.push('');
                 }
             }
         });
